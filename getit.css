@@ -29,6 +29,11 @@ body {
   color: #2c2c2c;
 }
 
+.lixo {
+  width: 15px;
+  height: 15px;
+}
+
 .appbar {
   display: flex;
   align-items: center;

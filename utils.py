@@ -39,3 +39,7 @@ def build_response(body='', code=200, reason='OK', headers=''):
     response += body
 
     return response.encode()
+
+def delete_note(note):
+    database = Database("notes")
+    database.delete(note)
