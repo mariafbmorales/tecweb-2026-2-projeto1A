@@ -1,8 +1,9 @@
 import json
+from database import Database,  Note
 
 def extract_route(requisicao):
     resp = requisicao.split(' ')
-    if len(resp):
+    if len(resp) > 0:
         resp = resp[1]
         return resp[1:]
     return
@@ -13,11 +14,9 @@ def read_file(argumento):
     arquivo.close()
     return conteudo
 
-def load_data(nome):
-    arquivo = open(f'data/{nome}', 'r')
-    conteudo = json.load(arquivo)
-    arquivo.close()
-    return conteudo
+def load_data():
+    database = Database("notes")
+    return database.get_all()
 
 def load_template(nome):
     arquivo = open(f'templates/{nome}', 'r')
@@ -26,11 +25,9 @@ def load_template(nome):
     return conteudo
 
 def add_note(dicionario):
-    conteudo = load_data('notes.json')
-    conteudo.append(dicionario)
-    arquivo = open(f'data/notes.json', 'w')
-    json.dump(conteudo, arquivo)
-    arquivo.close()
+    database = Database("notes")
+    note = Note(title=dicionario["titulo"], content=dicionario["detalhes"])
+    database.add(note)
 
 def build_response(body='', code=200, reason='OK', headers=''):
     response = f'HTTP/1.1 {code} {reason}\n'
