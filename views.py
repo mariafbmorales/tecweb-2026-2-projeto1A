@@ -1,47 +1,81 @@
 from urllib.parse import unquote_plus
 
-from utils import add_note, build_response, load_data, load_template, delete_note, get_note, update_note
+from database import Database, Note
+from utils import build_response, load_template
+
+
+def _parse_form_body(request):
+    request = request.replace('\r', '')
+    partes = request.split('\n\n')
+    corpo = partes[1]
+    params = {}
+    for chave_valor in corpo.split('&'):
+        chave, valor = chave_valor.split('=')
+        params[chave] = unquote_plus(valor)
+    return params
+
 
 def index(request):
+    erro = None
+
     if request.startswith('POST'):
-        request = request.replace('\r', '')
-        partes = request.split('\n\n')
-        corpo = partes[1]
-        params = {}
-        for chave_valor in corpo.split('&'):
-            chave, valor = chave_valor.split('=')
-            params[chave] = unquote_plus(valor)
+        params = _parse_form_body(request)
+        titulo = params.get('titulo', '').strip()
+        detalhes = params.get('detalhes', '').strip()
 
-        add_note(params)
+        if not titulo or not detalhes:
+            erro = 'Título e conteúdo são obrigatórios para criar uma anotação.'
+        else:
+            database = Database('notes')
+            database.add(Note(title=titulo, content=detalhes))
 
-        return build_response(
-            code=303,
-            reason='See Other',
-            headers='Location: /'
-        )
+            return build_response(
+                code=303,
+                reason='See Other',
+                headers='Location: /'
+            )
 
+    database = Database('notes')
     note_template = load_template('components/note.html')
     notes_li = [
-        note_template.format(id=dados.id, title=dados.title, details=dados.content)
-        for dados in load_data()
+        note_template.format(
+            id=dados.id,
+            title=dados.title,
+            details=dados.content,
+            favorite_label='★' if dados.favorite else '☆'
+        )
+        for dados in database.get_all()
     ]
     notes = '\n'.join(notes_li)
 
+    erro_html = f'<p class="form-error">{erro}</p>' if erro else ''
+
     return build_response(
-            body=load_template('index.html').format(notes=notes)
-        )
+        body=load_template('index.html').format(notes=notes, erro=erro_html)
+    )
+
 
 def edit(request, note_id):
-    if request.startswith('POST'):
-        request = request.replace('\r', '')
-        partes = request.split('\n\n')
-        corpo = partes[1]
-        params = {}
-        for chave_valor in corpo.split('&'):
-            chave, valor = chave_valor.split('=')
-            params[chave] = unquote_plus(valor)
+    database = Database('notes')
 
-        update_note(note_id, params)
+    if request.startswith('POST'):
+        params = _parse_form_body(request)
+        titulo = params.get('titulo', '').strip()
+        detalhes = params.get('detalhes', '').strip()
+
+        if not titulo or not detalhes:
+            note = database.get_by_id(note_id)
+            erro_html = '<p class="form-error">Título e conteúdo são obrigatórios.</p>'
+            return build_response(
+                body=load_template('edit.html').format(
+                    id=note.id,
+                    title=titulo or note.title,
+                    content=detalhes or note.content,
+                    erro=erro_html
+                )
+            )
+
+        database.update(Note(id=note_id, title=titulo, content=detalhes))
 
         return build_response(
             code=303,
@@ -49,25 +83,27 @@ def edit(request, note_id):
             headers='Location: /'
         )
 
-    note = get_note(note_id)
+    note = database.get_by_id(note_id)
+
+    if note is None:
+        return not_found()
 
     return build_response(
         body=load_template('edit.html').format(
             id=note.id,
             title=note.title,
-            content=note.content
+            content=note.content,
+            erro=''
         )
     )
 
-def confirm_delete(note_id):
-    note = get_note(note_id)
+
+def confirm_delete(request, note_id):
+    database = Database('notes')
+    note = database.get_by_id(note_id)
 
     if note is None:
-        return build_response(
-            body=load_template('404.html'),
-            code=404,
-            reason='Not Found'
-        )
+        return not_found()
 
     return build_response(
         body=load_template('confirmar-exclusao.html').format(
@@ -77,16 +113,32 @@ def confirm_delete(note_id):
         )
     )
 
-    # O RESTO DO CÓDIGO DA FUNÇÃO index CONTINUA DAQUI PARA BAIXO...
-    # Cria uma lista de <li>'s para cada anotação
-    # Se tiver curiosidade: https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions
-    note_template = load_template('components/note.html')
-    notes_li = [
-        note_template.format(id=dados.id, title=dados.title, details=dados.content)
-        for dados in load_data()
-    ]
-    notes = '\n'.join(notes_li)
+
+def delete(request, note_id):
+    database = Database('notes')
+    database.delete(note_id)
 
     return build_response(
-            body=load_template('index.html').format(notes=notes)
-        )
+        code=303,
+        reason='See Other',
+        headers='Location: /'
+    )
+
+
+def favorite(request, note_id):
+    database = Database('notes')
+    database.toggle_favorite(note_id)
+
+    return build_response(
+        code=303,
+        reason='See Other',
+        headers='Location: /'
+    )
+
+
+def not_found():
+    return build_response(
+        body=load_template('404.html'),
+        code=404,
+        reason='Not Found'
+    )

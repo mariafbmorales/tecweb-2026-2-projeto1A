@@ -21,6 +21,11 @@ class Database():
             );
             '''
         )
+        try:
+            self.conn.execute('ALTER TABLE note ADD COLUMN favorite INTEGER NOT NULL DEFAULT 0;')
+            self.conn.commit()
+        except sqlite3.OperationalError:
+            pass
 
     def add(self, note):
         self.conn.execute(
@@ -88,6 +93,17 @@ class Database():
         self.conn.execute(
             '''
             DELETE FROM note
+            WHERE id = ?;
+            ''',
+            (note_id,)
+        )
+        self.conn.commit()
+
+    def toggle_favorite(self, note_id):
+        self.conn.execute(
+            '''
+            UPDATE note
+            SET favorite = 1 - favorite
             WHERE id = ?;
             ''',
             (note_id,)
