@@ -7,7 +7,7 @@ class Note:
     id: int = None
     title: str = None
     content: str = ''
-
+    favorite: int = 0
 
 class Database():
     def __init__(self, nome):
@@ -21,6 +21,11 @@ class Database():
             );
             '''
         )
+        try:
+            self.conn.execute('ALTER TABLE note ADD COLUMN favorite INTEGER NOT NULL DEFAULT 0;')
+            self.conn.commit()
+        except sqlite3.OperationalError:
+            pass
 
     def add(self, note):
         self.conn.execute(
@@ -35,7 +40,8 @@ class Database():
     def get_all(self):
         cursor = self.conn.execute(
             '''
-            SELECT id, title, content FROM note
+            SELECT id, title, content, favorite FROM note
+            ORDER BY favorite DESC, id ASC
             '''
         )
 
@@ -45,7 +51,8 @@ class Database():
             note = Note(
                 id=linha[0],
                 title=linha[1],
-                content=linha[2]
+                content=linha[2],
+                favorite=linha[3]
             )
             notes.append(note)
 
@@ -54,12 +61,11 @@ class Database():
     def get_by_id(self, note_id):
         cursor = self.conn.execute(
             '''
-            SELECT id, title, content FROM note
+            SELECT id, title, content, favorite FROM note
             WHERE id = ?;
             ''',
             (note_id,)
         )
-        self.conn.commit()
 
         linha = cursor.fetchone()
 
@@ -69,7 +75,8 @@ class Database():
         return Note(
             id=linha[0],
             title=linha[1],
-            content=linha[2]
+            content=linha[2],
+            favorite=linha[3]
         )
 
 
@@ -88,6 +95,17 @@ class Database():
         self.conn.execute(
             '''
             DELETE FROM note
+            WHERE id = ?;
+            ''',
+            (note_id,)
+        )
+        self.conn.commit()
+
+    def toggle_favorite(self, note_id):
+        self.conn.execute(
+            '''
+            UPDATE note
+            SET favorite = 1 - favorite
             WHERE id = ?;
             ''',
             (note_id,)

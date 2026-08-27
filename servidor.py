@@ -1,7 +1,7 @@
 import socket
 from pathlib import Path
-from utils import extract_route, read_file, build_response, delete_note
-from views import index, edit, confirm_delete
+from utils import extract_route, read_file, build_response
+from views import index, edit, confirm_delete, delete, favorite, not_found
 
 CUR_DIR = Path(__file__).parent
 SERVER_HOST = 'localhost'
@@ -28,17 +28,20 @@ while True:
         response = build_response() + read_file(filepath)
     elif route == '':
         response = index(request)
-    elif route.startswith("delete"):
-        id = int(route.split("/")[1])
-        response = delete_note(id)
     elif route.startswith("confirm-delete"):
         id = int(route.split("/")[1])
-        response = confirm_delete(id)
+        response = confirm_delete(request, id)
+    elif route.startswith("delete"):
+        id = int(route.split("/")[1])
+        response = delete(request, id)
+    elif route.startswith("favorite"):
+        id = int(route.split("/")[1])
+        response = favorite(request, id)
     elif route.startswith("edit"):
         id = int(route.split("/")[1])
         response = edit(request, id)
     else:
-        response = build_response()
+        response = not_found()
 
     client_connection.sendall(response)
 
