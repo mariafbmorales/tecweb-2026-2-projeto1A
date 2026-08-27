@@ -57,7 +57,7 @@ class Database():
             SELECT id, title, content FROM note
             WHERE id = ?;
             ''',
-            (note_id)
+            (note_id,)
         )
         self.conn.commit()
 

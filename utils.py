@@ -19,7 +19,7 @@ def load_data():
     return database.get_all()
 
 def load_template(nome):
-    arquivo = open(f'templates/{nome}', 'r')
+    arquivo = open(f'templates/{nome}', 'r', encoding="utf-8")
     conteudo = arquivo.read()
     arquivo.close()
     return conteudo
