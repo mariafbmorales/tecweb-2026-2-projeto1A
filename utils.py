@@ -6,7 +6,7 @@ def extract_route(requisicao):
     if len(resp) > 0:
         resp = resp[1]
         return resp[1:]
-    return
+    return ''
 
 def read_file(argumento):
     arquivo = open(argumento, 'rb')
