@@ -29,6 +29,19 @@ def add_note(dicionario):
     note = Note(title=dicionario["titulo"], content=dicionario["detalhes"])
     database.add(note)
 
+def get_note(note_id):
+    database = Database("notes")
+    return database.get_by_id(note_id)
+
+def update_note(note_id, dicionario):
+    database = Database("notes")
+    note = Note(
+        id=note_id,
+        title=dicionario["titulo"],
+        content=dicionario["detalhes"]
+    )
+    database.update(note)
+
 def build_response(body='', code=200, reason='OK', headers=''):
     response = f'HTTP/1.1 {code} {reason}\n'
 
