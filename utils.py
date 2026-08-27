@@ -61,3 +61,10 @@ def delete_note(id):
         reason='See Other',
         headers='Location: /'
     )
+
+def not_found():
+    return build_response(
+        body=load_template('404.html'),
+        code=404,
+        reason='Not Found'
+    )

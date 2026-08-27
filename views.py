@@ -59,6 +59,24 @@ def edit(request, note_id):
         )
     )
 
+def confirm_delete(note_id):
+    note = get_note(note_id)
+
+    if note is None:
+        return build_response(
+            body=load_template('404.html'),
+            code=404,
+            reason='Not Found'
+        )
+
+    return build_response(
+        body=load_template('confirmar-exclusao.html').format(
+            id=note.id,
+            title=note.title,
+            details=note.content
+        )
+    )
+
     # O RESTO DO CÓDIGO DA FUNÇÃO index CONTINUA DAQUI PARA BAIXO...
     # Cria uma lista de <li>'s para cada anotação
     # Se tiver curiosidade: https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions

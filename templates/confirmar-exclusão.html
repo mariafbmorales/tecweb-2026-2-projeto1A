@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Get-it - Confirmar exclusão</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css"
+            integrity="sha512-NmLkDIU1C/C88wi324HBc+S2kLhi08PN5GDeUVVVC/BVt/9Izdsc9SVeVfA1UZbY3sHUlDSyRXhCzHfr6hmPPw=="
+            crossorigin="anonymous"
+        />
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto&family=Permanent+Marker&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="/getit.css" />
+    </head>
+
+    <body>
+        <div class="appbar">
+            <img src="img/logo-getit.png" class="logo" />
+            <span class="subtitle">Confirmar exclusão</span>
+        </div>
+
+        <main class="container" style="max-width: 500px;">
+            <div class="form-card" style="padding: 20px;">
+                <h3 class="card-title">Excluir "{title}"?</h3>
+                <p style="margin: 10px 0;">{details}</p>
+                <p>Tem certeza que deseja excluir esta anotação? Essa ação não pode ser desfeita.</p>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <a class="btn" href="/delete/{id}" style="text-align:center; text-decoration:none;">Sim</a>
+                    <a class="btn" href="/" style="text-align:center; text-decoration:none; background-color:#e5e5e5;">Não</a>
+                </div>
+            </div>
+        </main>
+    </body>
+</html>
