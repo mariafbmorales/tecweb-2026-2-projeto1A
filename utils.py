@@ -40,6 +40,11 @@ def build_response(body='', code=200, reason='OK', headers=''):
 
     return response.encode()
 
-def delete_note(note):
+def delete_note(id):
     database = Database("notes")
-    database.delete(note)
+    database.delete(id)
+    return build_response(
+        code=303,
+        reason='See Other',
+        headers='Location: /'
+    )

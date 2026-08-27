@@ -1,6 +1,6 @@
 from urllib.parse import unquote_plus
 
-from utils import add_note, build_response, load_data, load_template
+from utils import add_note, build_response, load_data, load_template, delete_note
 
 def index(request):
     # A string de request sempre começa com o tipo da requisição (ex: GET, POST)
